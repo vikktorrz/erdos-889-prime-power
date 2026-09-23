@@ -1,0 +1,2709 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\usepackage{array,booktabs,longtable}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\newcommand{\LL}{\operatorname{lcm}}
+\newcommand{\NN}{\mathbb N}
+\newcommand{\ZZ}{\mathbb Z}
+\newcommand{\QQ}{\mathbb Q}
+\newcommand{\PP}{\mathbb P}
+\newcommand{\EE}{\mathcal E}
+\newcommand{\ord}{\operatorname{ord}}
+\newcommand{\vp}{v_p}
+\newcommand{\Om}{\omega}
+\newcommand{\PhiC}{\Phi}
+
+\title{\textbf{A Diophantine and Structural Study of the Erd\H{o}s--Selfridge Prime-Power Variant of Problem \#889}}
+\author{Victor Manuel Mesa Solano\\
+\small Independent Researcher}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We study the prime-power variant introduced by Erd\H{o}s and Selfridge in their
+1967 paper on prime factors of consecutive integers.  For
+\[
+V(n,k)=\#\{p:\;p^{\nu_p(n+k)}>k\},
+\qquad
+V_1(n)=\max_{k\geq 1}V(n,k),
+\]
+Erd\H{o}s and Selfridge asked whether the set
+\[
+\{n\geq 1:\;V_1(n)=1\}
+\]
+is finite; they identified
+\[
+1,2,3,4,6,7,8,12,15,16,24,30,48,80
+\]
+as the known values below \(2500\), and remarked that \(80\) was probably the
+largest solution.  The question remains open.
+
+The purpose of this paper is not to claim a resolution.  Instead, we develop
+a detailed Diophantine reduction of the problem and record the advances obtained
+so far.  We first reformulate the condition in terms of the ordered
+prime-power components of \(n+k\), and derive the decomposition
+\[
+n+k=d_kq_k,\qquad d_k\mid \operatorname{lcm}(1,\ldots,k),
+\]
+together with the decisive compatibility condition
+\[
+\gcd(d_i,d_j)\mid |i-j|.
+\]
+We then give a complete proof that the branch \(d_2=1\) produces only
+the seven small values
+\[
+1,2,3,6,7,15,30,
+\]
+using Catalan--Mih\H ailescu, Bang--Zsigmondy, and elementary congruences.
+For the branch \(d_2=2,d_3=1\), we prove that if the large prime-power component
+of \(n+3\) has exponent \(>1\), then the branch collapses to the single
+exception \(n=24\).  We then analyze the complementary case in which \(n+3\)
+is prime.  If
+\[
+n+1=P^\alpha,
+\qquad
+n+2=2Q^\beta,
+\]
+the exponents are sharply constrained: when \(\alpha>1\), only the two
+known values \(n=8,80\) remain, while when \(\alpha=1\) and \(\beta>1\) the
+problem reduces to the residual simultaneous-primality family
+\[
+2\cdot3^{2^s}-1,\qquad
+\frac{3^{2^s}+1}{2},\qquad
+2\cdot3^{2^s}+1.
+\]
+We deliberately leave that final family open rather than claiming a
+resolution not supplied by the present arguments.
+
+The remaining leaves are also reduced explicitly.  In particular, for
+\(d_2=2,d_3=3\) we obtain \(12\mid n\), the dichotomy
+\(d_4\in\{1,4\}\), the collapse \(d_4=1\Rightarrow n=12\), and finally
+\(d_5\in\{1,5\}\).  The subbranch \(d_5=1\) yields a system of four
+consecutive prime-power equations, while \(d_5=5\) yields a chain of
+linear relations between prime powers and, at \(k=6\), an explicit exponential
+family when \(d_6=2\).
+
+An exact finite computation up to \(5\cdot 10^7\), recorded together with the
+research code, finds no new exceptions and exhibits a very rigid hierarchy of
+minimal witnesses.  We emphasize throughout the distinction between
+proved statements, named-theorem consequences, and computational observations.
+
+\end{abstract}
+
+\section{Research status and scope}
+
+The original Erd\H{o}s--Selfridge Problem \#889 asks whether
+\[
+v_0(n):=\max_{k\geq 0} v(n,k)\longrightarrow\infty
+\qquad (n\to\infty),
+\]
+where \(v(n,k)\) counts distinct prime factors of \(n+k\) exceeding \(k\).
+The problem is currently listed as open, and the formalized statement in the
+Google DeepMind \emph{Formal Conjectures} project is likewise marked
+\texttt{research open}.  The prime-power variant discussed in this paper is
+also explicitly represented there as an open statement.  See
+\cite{erdos1967,erdosproblems,formal889}.
+
+Accordingly, the central objective of this manuscript is to build a rigorous
+partial theory rather than to advertise a complete solution.  In particular,
+all branches that are not actually proved to be impossible are kept visible
+in the final decision tree.
+
+There are three different levels of information used below.
+
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Elementary or named-theorem proofs.}
+    These are lemmas proved in the paper, sometimes using standard results such
+    as Catalan--Mih\H ailescu or Bang--Zsigmondy.
+    \item \textbf{Exact computational observations.}
+    These concern only a finite interval and are not used as substitutes for
+    an infinite proof.
+    \item \textbf{Research targets.}
+    These are surviving Diophantine systems for which we do not yet have a
+    complete elimination.
+\end{enumerate}
+
+This distinction is essential: the problem remains open even though a large
+finite range is completely understood computationally.
+
+\section{The Erd\H{o}s--Selfridge prime-power variant}
+
+\subsection{Prime-power components}
+
+For an integer \(m\geq2\), write
+\[
+m=\prod_{p\mid m}p^{\nu_p(m)}.
+\]
+For each prime divisor \(p\mid m\), define its full prime-power component by
+\[
+Q_p(m):=p^{\nu_p(m)}.
+\]
+Order the distinct components decreasingly:
+\[
+Q_1(m)>Q_2(m)>\cdots>Q_{\omega(m)}(m).
+\]
+If \(m\) has only one prime divisor, put \(Q_2(m)=0\).
+
+We study
+\[
+V(n,k)=\#\{p:\;Q_p(n+k)>k\}
+       =\#\{p:\;p^{\nu_p(n+k)}>k\},
+\]
+and
+\[
+V_1(n)=\max_{k\geq1}V(n,k).
+\]
+
+Thus \(V(n,k)\leq1\) means that among the full prime-power components of
+\(n+k\), at most one exceeds \(k\).
+
+\begin{lemma}\label{lem:q2}
+For every \(n\geq1\) and \(k\geq1\),
+\[
+V(n,k)\geq2
+\iff
+Q_2(n+k)>k.
+\]
+\end{lemma}
+
+\begin{proof}
+By definition, \(V(n,k)\geq2\) exactly when at least two distinct
+prime-power components of \(n+k\) exceed \(k\).  This is equivalent to the
+second largest such component exceeding \(k\).
+\end{proof}
+
+\subsection{Interval formulation}
+
+Writing \(m=n+k\), the inequality \(Q_2(m)>k\) becomes
+\[
+m-n>0,\qquad m-n<Q_2(m).
+\]
+Equivalently,
+\[
+m-Q_2(m)+1\leq n\leq m-1.
+\]
+Hence every integer \(m\) contributes an interval
+\[
+\boxed{
+m-Q_2(m)+1\leq n\leq m-1
+}
+\tag{1}\label{eq:interval}
+\]
+on which \(V(n,m-n)\geq2\).
+
+Consequently, proving that \(V_1(n)\geq2\) for all sufficiently large \(n\)
+is equivalent to proving that these intervals cover all sufficiently large
+integers.
+
+\subsection{A universal bound on the offset}
+
+\begin{lemma}\label{lem:kbound}
+If \(V(n,k)\geq2\), then
+\[
+k^2-k<n.
+\]
+\end{lemma}
+
+\begin{proof}
+If \(V(n,k)\geq2\), there are two distinct prime-power components
+\(A,B>k\) dividing \(n+k\).  Since they correspond to distinct primes,
+they are coprime, so
+\[
+AB\mid n+k.
+\]
+Therefore
+\[
+n+k\geq AB>k^2,
+\]
+which gives
+\[
+n>k^2-k.
+\]
+\end{proof}
+
+Thus for a finite computation \(n\leq N\), it suffices to consider
+\[
+1\leq k\leq K(N),
+\qquad
+K(N)=\max\{k:\;k^2-k<N\}.
+\]
+
+\section{Exact finite computation}
+
+The accompanying exact sieve computes the second-largest prime-power
+component \(Q_2(m)\) for every
+\[
+m\leq N+K(N)
+\]
+using a smallest-prime-factor table.  The interval representation
+\eqref{eq:interval} is then accumulated with a difference array.
+
+For
+\[
+N=50\,000\,000,
+\qquad
+K(N)=7071,
+\]
+the reported exact computation finds precisely
+\[
+\boxed{
+\EE=
+\{1,2,3,4,6,7,8,12,15,16,24,30,48,80\}
+}
+\tag{2}
+\]
+as the values with \(V_1(n)=1\).
+
+This is a \emph{finite computational theorem}: it asserts the complete answer
+inside the stated range and nothing about larger \(n\).
+
+The same computation defines the minimal witness
+\[
+\kappa(n):=\min\{k\geq1:\;V(n,k)\geq2\}
+\]
+for every non-exceptional \(n\leq50\,000\,000\).  The recorded distribution is
+\[
+\begin{array}{c|r}
+\kappa(n)&\text{number of }n\\
+\hline
+1&46\,997\,805\\
+2&2\,876\,654\\
+3&113\,669\\
+4&11\,288\\
+5&484\\
+6&80\\
+7&4\\
+8&2
+\end{array}
+\tag{3}\label{eq:decomp}
+\]
+and the last six integers surviving the tests \(k\leq6\) are
+\[
+240,\quad
+471240,\quad
+5516280,\quad
+16831080,\quad
+18164160,\quad
+29743560.
+\tag{4}
+\]
+Four are eliminated at \(k=7\), while
+\[
+\kappa(5516280)=\kappa(18164160)=8.
+\]
+
+An important warning is worth recording.  The number \(240\) is \emph{not}
+an exception to the prime-power variant: indeed
+\[
+240+7=247=13\cdot19,
+\]
+so \(V(240,7)=2\).  It is only an exceptionally late finite-range survivor
+of the tests \(k\leq6\).
+
+\section{The divisor decomposition}
+
+From now on, assume
+\[
+V_1(n)=1.
+\]
+For each \(k\), put
+\[
+L_k:=\operatorname{lcm}(1,2,\ldots,k).
+\]
+
+All but at most one prime-power component of \(n+k\) are \(\leq k\).  Their
+product therefore divides \(L_k\).  Hence we may write
+\[
+\boxed{
+n+k=d_kq_k,
+\qquad
+d_k\mid L_k,
+\qquad
+\gcd(d_k,q_k)=1,
+}
+\tag{5}
+\]
+where \(q_k\) is either \(1\) or the unique prime-power component which may
+exceed \(k\).
+
+For large \(n\), once \(k\geq8\), \(q_k=1\) is impossible because
+\(n+k>L_k\) for the relevant range.
+
+\begin{lemma}\label{lem:gcd}
+For \(i\neq j\),
+\[
+\boxed{
+\gcd(d_i,d_j)\mid |i-j|.
+}
+\tag{6}\label{eq:gcd}
+\]
+In particular,
+\[
+\boxed{
+\gcd(d_k,d_{k+1})=1.
+}
+\tag{7}
+\]
+\end{lemma}
+
+\begin{proof}
+Suppose a prime \(\ell\) divides both \(d_i\) and \(d_j\).  Then
+\(\ell\mid n+i\) and \(\ell\mid n+j\), hence
+\[
+\ell\mid (n+i)-(n+j)=i-j.
+\]
+The same statement prime-by-prime gives the divisibility claim for the gcd.
+The consecutive case follows because \(|k-(k+1)|=1\).
+\end{proof}
+
+The simple relation \eqref{eq:gcd} is the basic mechanism behind the
+Diophantine decision tree.
+
+\section{Complete treatment of the branch \(d_2=1\)}
+
+We now prove a substantial theorem which closes the entire \(d_2=1\)
+branch.
+
+\subsection{Two consecutive prime powers}
+
+Since \(d_1=1\), we have
+\[
+n+1=p^a.
+\]
+If \(d_2=1\), then
+\[
+n+2=q^b.
+\]
+Thus \(n+1\) and \(n+2\) are consecutive prime powers.
+
+One of the two numbers is even, and therefore one of the underlying primes
+is \(2\).
+
+\subsubsection{Case I: \(n+1=2^a\)}
+
+Then
+\[
+n+2=2^a+1=q^b.
+\]
+
+If \(a,b>1\), Catalan--Mih\H ailescu gives the unique pair of consecutive
+perfect powers \(8,9\), hence
+\[
+n=7.
+\]
+If \(a=1\), then \(n=1\).
+
+Suppose \(b=1\).  Then
+\[
+2^a+1
+\]
+is prime.  For \(a>1\), \(a\) must be a power of \(2\): if
+\(a=rs\) with \(r>1\) odd, then
+\[
+2^a+1=(2^s)^r+1
+\]
+is composite.  Hence
+\[
+a=2^t,\qquad t\geq1.
+\]
+The values \(t=1,2\) give
+\[
+n=3,\qquad n=15.
+\]
+It remains to eliminate
+\[
+\boxed{
+n=2^{2^t}-1,\qquad t\geq3.
+}
+\tag{8}\label{eq:doubleexp}
+\]
+
+\begin{lemma}\label{lem:doubleexp}
+For every \(t\geq3\),
+\[
+n=2^{2^t}-1
+\]
+satisfies \(V(n,k)\geq2\) for some \(k\leq4\).
+\end{lemma}
+
+\begin{proof}
+Put
+\[
+M=2^t.
+\]
+
+Suppose first that \(t\) is even.  Then \(t\geq4\), and
+\[
+A:=M-1=2^t-1
+\]
+is an odd composite integer.
+
+Now
+\[
+n+3=2^M+2=2(2^{A}+1).
+\]
+Choose a proper divisor \(u\mid A\) with \(u\geq5\).  Such a divisor exists
+because \(A\geq15\) is odd composite.  Then
+\[
+2^u+1\mid 2^A+1.
+\]
+
+By the Bang--Zsigmondy theorem there exists a primitive prime divisor
+\(r\) of
+\[
+2^{2A}-1,
+\]
+so
+\[
+\ord_r(2)=2A.
+\]
+Likewise, since \(u\geq5\), there exists a primitive prime divisor
+\(\ell\) of
+\[
+2^{2u}-1,
+\]
+with
+\[
+\ord_\ell(2)=2u.
+\]
+Both \(r\) and \(\ell\) divide \(2^A+1\), while their orders are different,
+so \(r\neq\ell\).  Moreover both primes exceed \(3\).  Thus
+\(n+3\) has at least two prime-power components \(>3\), and
+\[
+V(n,3)\geq2.
+\]
+
+Now suppose \(t\) is odd.  Then
+\[
+M=2^t\equiv2\pmod3.
+\]
+Since \(2\) has order \(3\) modulo \(7\),
+\[
+2^M+3\equiv2^2+3\equiv4+3\equiv0\pmod7.
+\]
+Hence
+\[
+7\mid n+4.
+\]
+Also \(n+4\) is odd and
+\[
+n+4=2^M+3\equiv1\pmod3,
+\]
+so the quotient \((n+4)/7\) is an integer \(>1\) with no prime factor
+\(2\) or \(3\).  Hence it has a prime divisor \(>3\), distinct from \(7\).
+Consequently
+\[
+V(n,4)\geq2.
+\]
+\end{proof}
+
+Thus the family \eqref{eq:doubleexp} contains no counterexample.
+
+\subsubsection{Case II: \(n+2=2^b\)}
+
+Now
+\[
+n+1=p^a,\qquad n+2=2^b.
+\]
+If \(a,b>1\), Catalan--Mih\H ailescu would force the pair
+\(8,9\), but the larger member here would have to be \(2^b\), impossible.
+Hence
+\[
+a=1.
+\]
+Therefore
+\[
+n=2^b-2,
+\qquad
+p=2^b-1.
+\]
+Since \(p\) is prime,
+\[
+\boxed{b\text{ is prime}.}
+\tag{9}
+\]
+The small primes give
+\[
+b=2,3,5
+\quad\Longrightarrow\quad
+n=2,6,30.
+\]
+
+Suppose \(b>3\).
+
+If
+\[
+b\equiv3\pmod4,
+\]
+then
+\[
+n+4=2^b+2=2(2^{b-1}+1).
+\]
+Since \(b-1\equiv2\pmod4\),
+\[
+5\mid 2^{b-1}+1,
+\]
+while \(3\nmid 2^{b-1}+1\).  Since \(V(n,4)\leq1\), every prime factor of
+the odd number \(2^{b-1}+1\) other than possibly \(5\) would be another
+prime \(>4\).  Hence
+\[
+2^{b-1}+1=5^c.
+\]
+Modulo \(8\), this gives \(c\) even.  Thus
+\[
+5^c-2^{b-1}=1
+\]
+is a pair of consecutive perfect powers with both exponents \(>1\), which
+contradicts Catalan--Mih\H ailescu.  Therefore
+\[
+\boxed{b\equiv1\pmod4.}
+\tag{10}\label{eq:d3mod4}
+\]
+
+We sharpen this.
+
+\begin{lemma}\label{lem:fermatform}
+Under \(d_2=1\), if \(n=2^b-2\) with \(b>5\), then
+\[
+b=2^{2^s}+1
+\]
+for some \(s\geq2\).
+\end{lemma}
+
+\begin{proof}
+We have
+\[
+n+4=2(2^{b-1}+1).
+\]
+Put
+\[
+A=b-1.
+\]
+By \eqref{eq:d3mod4}, \(4\mid A\).
+
+Suppose \(A\) has an odd divisor \(r>1\).  Write
+\[
+A=rs.
+\]
+Then \(s\) is also divisible by \(4\), and
+\[
+2^s+1\mid2^A+1.
+\]
+
+A primitive divisor \(\ell\) of
+\[
+2^{2s}-1
+\]
+has
+\[
+\ord_\ell(2)=2s.
+\]
+A primitive divisor \(R\) of
+\[
+2^{2A}-1
+\]
+has
+\[
+\ord_R(2)=2A.
+\]
+Both divide \(2^A+1\), and the orders are different, so
+\(\ell\neq R\).  Since \(s\geq4\), both primes exceed \(4\), contradicting
+\(V(n,4)\leq1\).
+
+Hence \(A\) has no odd divisor and therefore
+\[
+A=2^t.
+\]
+Thus
+\[
+b=2^t+1.
+\]
+Since \(b\) is prime, \(t\) itself must be a power of \(2\).  Therefore
+\[
+b=2^{2^s}+1.
+\]
+\end{proof}
+
+It remains to eliminate these Fermat-prime-shaped values.
+
+\begin{lemma}\label{lem:fermatbranch}
+Let
+\[
+b=2^{2^s}+1,\qquad s\geq2,
+\]
+and
+\[
+n=2^b-2.
+\]
+Then
+\[
+V(n,6)\geq2.
+\]
+\end{lemma}
+
+\begin{proof}
+Put
+\[
+M=b-2=2^{2^s}-1.
+\]
+Since \(s\geq2\), the exponent \(2^s\) is divisible by \(4\), so
+\[
+5\mid M.
+\]
+Also \(M\) is odd and \(M>5\).
+
+We have
+\[
+n+6
+=
+2^b+4
+=
+4(2^{b-2}+1)
+=
+4(2^M+1).
+\]
+
+The divisor \(5\mid M\) implies
+\[
+2^5+1=33\mid2^M+1.
+\]
+In particular,
+\[
+11\mid2^M+1,
+\]
+and \(11>6\).
+
+On the other hand, Bang--Zsigmondy gives a primitive prime divisor \(R\)
+of
+\[
+2^{2M}-1.
+\]
+Hence
+\[
+\ord_R(2)=2M,
+\]
+so \(R>2M>6\), and \(R\mid2^M+1\).
+
+Finally \(R\neq11\), since their multiplicative orders are different:
+\[
+2M\neq10.
+\]
+Thus \(n+6\) has two distinct prime-power components exceeding \(6\),
+namely \(11\) and \(R\). Hence
+\[
+V(n,6)\geq2.
+\]
+\end{proof}
+
+We have therefore obtained the following complete statement.
+
+\begin{theorem}\label{thm:d2one}
+If
+\[
+V(n,k)\leq1
+\qquad\text{for all }1\leq k\leq6
+\]
+and \(d_2=1\), then
+\[
+\boxed{
+n\in\{1,2,3,6,7,15,30\}.
+}
+\]
+In particular, every counterexample with \(n>30\) satisfies
+\[
+\boxed{d_2=2.}
+\]
+\end{theorem}
+
+\begin{remark}
+This theorem is stronger than the informal ``Catalan + finite check''
+argument in earlier drafts.  The infinite families which appear naturally
+after applying Catalan are eliminated using the order-theoretic form of the
+Bang--Zsigmondy theorem.
+\end{remark}
+
+\section{Consequences of \(d_2=2\)}
+
+Assume now
+\[
+d_2=2.
+\]
+Then
+\[
+n+2=2q_2
+\]
+with \(q_2\) odd. Hence
+\[
+n=2(q_2-1),
+\]
+and therefore
+\[
+\boxed{4\mid n.}
+\tag{11}
+\]
+
+Since \(d_3\mid6\) and \(\gcd(d_2,d_3)=1\),
+\[
+\boxed{d_3\in\{1,3\}.}
+\tag{12}
+\]
+
+We now treat these two branches separately.
+
+\section{The branch \(d_2=2,\ d_3=1\)}
+
+Write
+\[
+n+3=r^c.
+\]
+Because \(4\mid n\),
+\[
+r^c\equiv3\pmod4,
+\]
+so
+\[
+\boxed{
+r\equiv3\pmod4,
+\qquad
+c\text{ odd}.
+}
+\tag{13}
+\]
+
+\subsection{The \(k=4\) reduction}
+
+Set
+\[
+s=\vp(r+1).
+\]
+Since \(c\) is odd, the \(2\)-adic form of LTE gives
+\[
+\vp(r^c+1)=\vp(r+1)=s.
+\tag{14}
+\]
+
+\subsubsection{Case \(s=2\)}
+
+Then
+\[
+r^c+1=4A,
+\qquad
+A\text{ odd}.
+\]
+Because \(V(n,4)\leq1\), the odd part \(A\) can have at most one prime divisor
+exceeding \(4\).  Since \(A\) itself is odd and has no factors \(2\), the
+large-prime condition forces \(A\) to be a power of one odd prime whenever
+\(A>1\).
+
+Factor
+\[
+A=
+\frac{r+1}{4}
+\cdot
+\frac{r^c+1}{r+1}
+=
+A_1B,
+\]
+where
+\[
+A_1=\frac{r+1}{4},
+\qquad
+B=r^{c-1}-r^{c-2}+\cdots-r+1.
+\]
+
+If \(r>3\) and \(c>1\), then \(A_1>1\) and \(B>1\).  Since
+\(A=A_1B\) is a power of one prime \(\ell\),
+\[
+A_1=\ell^u,\qquad B=\ell^v.
+\]
+In particular \(\ell\mid r+1\) and \(\ell\mid B\).  Since
+\(r\equiv-1\pmod{r+1}\),
+\[
+B\equiv c\pmod{r+1},
+\]
+hence
+\[
+\ell\mid c.
+\]
+By LTE,
+\[
+v_\ell(B)=v_\ell(c).
+\]
+But \(B=\ell^{v_\ell(c)}\), and therefore
+\[
+B\leq c.
+\]
+On the other hand, for \(r\geq3\) and \(c\geq3\),
+\[
+B=r^{c-1}-r^{c-2}+\cdots-r+1>c.
+\]
+This contradiction shows:
+
+\[
+\boxed{
+s=2,\ c>1
+\Longrightarrow
+r=3.
+}
+\tag{15}\label{eq:r3reduction}
+\]
+
+\subsubsection{Case \(s\geq3\)}
+
+Now \(2^s>4\) itself is a large prime-power component of \(n+4\).  Therefore
+the remaining odd part can involve no prime \(>4\).  Since it is odd, the
+only possibility is \(1\) or \(3\):
+\[
+r^c+1=2^s
+\qquad\text{or}\qquad
+r^c+1=3\cdot2^s.
+\]
+
+If
+\[
+r^c+1=2^s
+\]
+with \(c>1\), then
+\[
+r^c+1=(r+1)
+(r^{c-1}-r^{c-2}+\cdots-r+1)
+\]
+has an odd factor \(>1\), impossible.
+
+If
+\[
+r^c+1=3\cdot2^s,
+\]
+then
+\[
+(r+1)
+(r^{c-1}-r^{c-2}+\cdots-r+1)=3\cdot2^s.
+\]
+The second factor is odd and \(>1\), so it must equal \(3\).  But for
+\(r\geq3\) and \(c\geq3\),
+\[
+r^{c-1}-r^{c-2}+\cdots-r+1
+\geq r^2-r+1\geq7,
+\]
+again impossible.
+
+Therefore
+\[
+\boxed{
+s\geq3,\ c>1
+\Longrightarrow
+\text{contradiction}.
+}
+\tag{16}\label{eq:slarge}
+\]
+
+Combining \eqref{eq:r3reduction} and \eqref{eq:slarge} gives the key reduction.
+
+\begin{lemma}\label{lem:r3}
+If
+\[
+d_2=2,\qquad d_3=1,\qquad c>1,
+\]
+then
+\[
+\boxed{r=3}.
+\]
+Consequently
+\[
+\boxed{n=3^c-3.}
+\]
+\end{lemma}
+
+\subsection{The exponent \(c\) is prime}
+
+Now
+\[
+n+2=3^c-1=2q_2,
+\]
+so
+\[
+Q_c:=\frac{3^c-1}{2}
+\]
+is a prime power.
+
+\begin{lemma}\label{lem:cprime}
+If \(c>1\), then \(c\) is prime.
+\end{lemma}
+
+\begin{proof}
+Since \(c\) is odd, suppose
+\[
+c=ab,\qquad a,b>1.
+\]
+Then
+\[
+Q_c=
+\frac{3^a-1}{2}
+(1+3^a+\cdots+3^{a(b-1)})
+=:AB.
+\]
+Both \(A\) and \(B\) exceed \(1\).  Since \(AB\) is a prime power,
+\[
+A=\ell^u,\qquad B=\ell^v
+\]
+for one prime \(\ell\).
+
+As \(\ell\mid3^a-1\),
+\[
+B\equiv b\pmod{3^a-1},
+\]
+so
+\[
+\ell\mid b.
+\]
+By LTE,
+\[
+v_\ell(B)=v_\ell(b).
+\]
+Thus
+\[
+B=\ell^{v_\ell(b)}\leq b.
+\]
+But
+\[
+B=1+3^a+\cdots+3^{a(b-1)}>b,
+\]
+contradiction.
+\end{proof}
+
+Hence
+\[
+\boxed{c=p}
+\]
+for some odd prime \(p\), and
+\[
+\boxed{n=3^p-3.}
+\tag{17}
+\]
+
+At this point,
+\[
+n+1=3^p-2=P^\alpha,
+\tag{18}
+\]
+\[
+n+2=3^p-1=2Q^\beta,
+\tag{19}
+\]
+and
+\[
+n+4=3^p+1=4R^\gamma.
+\tag{20}
+\]
+In particular
+\[
+\frac{3^p-1}{2}=\PhiC_p(3),
+\qquad
+\frac{3^p+1}{4}=\PhiC_{2p}(3),
+\]
+so the \(k=2\) and \(k=4\) conditions impose prime-power values on two
+cyclotomic evaluations.
+
+\subsection{The decisive split modulo \(4\)}
+
+\subsubsection{Case \(p\equiv1\pmod4\)}
+
+Consider
+\[
+n+6=3^p+3=3(3^{p-1}+1).
+\]
+Because \(p-1\) is even,
+\[
+\vp(3^{p-1}+1)=1.
+\]
+Also
+\[
+3^{p-1}+1\equiv2\pmod3
+\]
+and, since \(p-1\equiv0\pmod4\),
+\[
+3^{p-1}+1\equiv2\pmod5.
+\]
+Therefore
+\[
+T:=\frac{3^{p-1}+1}{2}
+\]
+is odd and has no prime factors \(\leq5\).
+
+Since \(V(n,6)\leq1\),
+\[
+\boxed{T\text{ is a prime power}.}
+\tag{21}\label{eq:Tk6}
+\]
+
+Write
+\[
+p-1=2^tm,
+\qquad
+m\text{ odd}.
+\]
+Then
+\[
+T=\frac{3^{2^tm}+1}{2}.
+\]
+The factor
+\[
+A=\frac{3^{2^t}+1}{2}
+\]
+divides \(T\).
+
+Let \(\ell\) be a prime divisor of \(A\).  Then
+\[
+\ord_\ell(3)\mid 2^{t+1}.
+\]
+By Bang--Zsigmondy, applied to
+\[
+3^{2(p-1)}-1,
+\]
+there exists a primitive prime divisor \(R\) with
+\[
+\ord_R(3)=2(p-1)=2^{t+1}m.
+\]
+It divides
+\[
+3^{p-1}+1,
+\]
+hence \(T\).  If \(m>1\), then
+\[
+2^{t+1}m>2^{t+1},
+\]
+so \(R\neq\ell\).  Thus \(T\) has at least two distinct prime divisors,
+contradicting \eqref{eq:Tk6}.  Hence
+\[
+m=1,
+\]
+so
+\[
+p-1=2^t.
+\tag{22}
+\]
+
+Since \(p>3\) is prime, \(t\) is even.  Thus
+\[
+p=2^t+1\equiv2\pmod3.
+\]
+Modulo \(13\), since \(3^3\equiv1\),
+\[
+3^p+4\equiv3^2+4\equiv0\pmod{13}.
+\]
+Hence
+\[
+13\mid n+7.
+\]
+Moreover \(n+7\) is not divisible by \(2,3,5,7\):
+\[
+n+7=3^p+4,
+\]
+\[
+3^p+4\equiv1\pmod3,
+\]
+\[
+3^p+4\equiv2\pmod5,
+\]
+and \(p\equiv5\pmod6\) gives
+\[
+3^p+4\equiv3^5+4\equiv2\pmod7.
+\]
+Therefore, under \(V(n,7)\leq1\), the component \(13\) is the only possible
+large component, so
+\[
+3^p+4=13^\delta.
+\]
+But modulo \(8\),
+\[
+3^p+4\equiv3+4\equiv7\pmod8,
+\]
+whereas
+\[
+13^\delta\equiv1\text{ or }5\pmod8.
+\]
+Contradiction.
+
+Thus
+\[
+\boxed{
+p\equiv1\pmod4
+\quad\Longrightarrow\quad
+\text{no counterexample}.
+}
+\tag{23}
+\]
+
+\subsubsection{Case \(p\equiv3\pmod4\)}
+
+Since \(p\equiv3\pmod4\),
+\[
+3^p-2\equiv2-2\equiv0\pmod5.
+\]
+But \(n+1=3^p-2=P^\alpha\) is a prime power. Therefore
+\[
+P=5,
+\]
+so
+\[
+3^p-2=5^\alpha.
+\tag{24}
+\]
+
+Modulo \(8\),
+\[
+3^p-2\equiv3-2\equiv1\pmod8.
+\]
+Since
+\[
+5^\alpha\equiv1\pmod8
+\]
+only when \(\alpha\) is even,
+\[
+\alpha=2a.
+\]
+Thus
+\[
+(5^a)^2+2=3^p.
+\]
+
+We now invoke Ljunggren's classical theorem on the generalized
+Lebesgue--Nagell equation: for integers \(x>0\), \(y>1\), \(m>1\),
+\[
+x^2+2=y^m
+\]
+has only the solution
+\[
+(x,y,m)=(5,3,3).
+\]
+See \cite{ljunggren1943}.
+
+Therefore
+\[
+a=1,\qquad p=3.
+\]
+Consequently
+\[
+\boxed{n=3^3-3=24.}
+\]
+
+We have thus proved:
+
+\begin{proposition}\label{prop:branchclosed}
+If
+\[
+d_2=2,\qquad d_3=1,
+\]
+and the exponent in
+\[
+n+3=r^c
+\]
+satisfies \(c>1\), then
+\[
+\boxed{n=24.}
+\]
+\end{proposition}
+
+This closes the entire \(d_2=2,d_3=1,c>1\) branch.
+
+\section{Analysis and reduction of the branch $d_2=2,\ d_3=1$}
+
+We now strengthen the analysis of the leaf $d_2=2,d_3=1$.  The proper
+prime-power case $n+3=r^c$, $c>1$, was settled in
+Proposition~\ref{prop:branchclosed}.  We complete the complementary case
+$c=1$ here.
+
+Assume throughout this section that
+\[
+V_1(n)=1,
+\qquad d_2=2,
+\qquad d_3=1,
+\qquad n+3=R
+\]
+with $R$ prime.  Then
+\[
+n+1=P^\alpha,
+\qquad
+n+2=2Q^\beta,
+\]
+where $P,Q$ are odd primes.  Equivalently,
+\[
+\boxed{
+P^\alpha+1=2Q^\beta,
+\qquad
+P^\alpha+2=R.
+}
+\tag{25}\label{eq:c1system}
+\]
+The condition $d_2=2$ implies $4\mid n$.
+
+\begin{proposition}[Exponent rigidity on the prime $n+3$ leaf]
+\label{prop:primeleaf}
+Assume
+\[
+V_1(n)=1,
+\qquad d_2=2,
+\qquad d_3=1,
+\qquad n+3=R
+\]
+with $R$ prime.  Write
+\[
+n+1=P^\alpha,
+\qquad
+n+2=2Q^\beta.
+\]
+Then the following reductions hold.
+\begin{enumerate}[label=(\roman*)]
+    \item If $\alpha>1$, then
+    \[
+    P=3,
+    \qquad \beta=1,
+    \qquad \alpha\in\{2,4\},
+    \]
+    and hence
+    \[
+    n\in\{8,80\}.
+    \]
+    \item If $\alpha=1$ and $\beta>1$, then
+    \[
+    Q=3,
+    \qquad \beta=2^s\quad(s\geq1),
+    \]
+    and necessarily
+    \[
+    2\cdot3^\beta-1,
+    \qquad
+    \frac{3^\beta+1}{2},
+    \qquad
+    2\cdot3^\beta+1
+    \]
+    are all prime.  The case $s=1$ gives $n=16$.
+    The elimination of $s>1$ is left as an explicit residual Diophantine
+    problem.
+    \item If $\alpha=\beta=1$, then $n=4$.
+\end{enumerate}
+Consequently, apart from the explicit residual family in (ii), the
+$d_2=2,d_3=1$ branch consists only of
+\[
+\boxed{n\in\{4,8,16,24,80\}}.
+\]
+\end{proposition}
+
+\begin{proof}
+Suppose first that an odd prime $s$ divides $\alpha$, and write
+$\alpha=st$ with $s>1$ odd.  Then
+\[
+P^\alpha+1
+=(P^t+1)
+\left(P^{t(s-1)}-P^{t(s-2)}+\cdots-P^t+1\right).
+\]
+The second factor is odd and greater than $1$.  Since the product is
+$2Q^\beta$, the odd part of the first factor and the second factor can
+involve only the prime $Q$.  Put $X=P^t$ and
+\[
+B=\frac{X^s+1}{X+1}.
+\]
+Then $Q\mid X+1$ and, reducing modulo $X+1$,
+\[
+B\equiv s\pmod{X+1}.
+\]
+Hence $Q\mid s$.  Since $s$ is odd, LTE gives
+\[
+\nu_Q(B)=\nu_Q(s).
+\]
+Thus $B\le s$, whereas $B>s$ for $X\ge3$ and $s\ge3$, a contradiction.
+Therefore
+\[
+\boxed{\alpha=2^u}.
+\]
+
+Assume now $\alpha>1$ and put
+\[
+X=P^{\alpha/2}.
+\]
+Then
+\[
+X^2+1=2Q^\beta,
+\qquad
+R=X^2+2.
+\]
+Since $R$ is prime, $P\neq3$ would give $X^2\equiv1\pmod3$ and hence
+$R\equiv0\pmod3$, impossible for $R>3$.  Thus
+\[
+P=3.
+\]
+If $\beta>2$, the classification of
+\[
+x^2+1=2y^m
+\]
+for $xy>1$ and $m>2$ gives only $(x,y,m)=(239,13,4)$;
+see \cite{Cohn1993,SteinerTzanakis1991}.  This is impossible because
+$X$ is a power of $3$.  If $\beta=2$, then $3\mid X$ and reduction modulo
+$3$ gives
+\[
+1\equiv2Q^2\pmod3,
+\]
+which is impossible.  Hence
+\[
+\boxed{\beta=1}.
+\]
+
+Consequently
+\[
+n=3^\alpha-1,
+\qquad \alpha=2^u.
+\]
+Suppose $\alpha>2$.  Since
+\[
+n+4=3(3^{\alpha-1}+1),
+\]
+the condition $V(n,4)\le1$ implies that
+\[
+T=\frac{3^{\alpha-1}+1}{4}
+\]
+is a prime power.  Put $m=\alpha-1=2^u-1$.  If $m=rs$ with $r,s>1$ odd,
+then, with $x=3^r$,
+\[
+T=\frac{x+1}{4}
+\left(x^{s-1}-x^{s-2}+\cdots-x+1\right).
+\]
+The two factors are $>1$.  If their product is a power of one odd prime
+$\ell$, then $\ell\mid x+1$ and the second factor is congruent to $s$
+modulo $x+1$.  Hence $\ell\mid s$, and LTE gives its $\ell$-adic
+valuation as $\nu_\ell(s)$.  It is therefore at most $s$, whereas the
+factor itself is $>s$.  Contradiction.  Hence $m$ is prime, and so
+$u$ is prime.
+
+If $u$ is odd and $u\ge3$, then $\alpha=2^u$ satisfies
+$\alpha\equiv0\pmod4$ and $\alpha\equiv2\pmod3$.  Consequently
+\[
+5\mid 3^\alpha+4,
+\qquad
+13\mid 3^\alpha+4.
+\]
+Let
+\[
+M=3^\alpha+4.
+\]
+Since $M\equiv7\pmod8$, $M$ cannot have the form $5^a13^b$, because
+$5^a13^b\equiv1$ or $5\pmod8$.  Thus, besides the divisor $13$, there is
+another prime divisor exceeding $5$.  The two corresponding prime-power
+components both exceed the offset $k=5$, so
+\[
+V(n,5)\ge2,
+\]
+a contradiction.  Therefore $u=1$ or $u=2$, giving
+\[
+\alpha=2,4,
+\qquad n=8,80.
+\]
+This proves (i).
+
+Now assume $\alpha=1$ and $\beta>1$.  Since $P$ and $P+2$ are both prime,
+$P\not\equiv1\pmod3$, so $P\equiv2\pmod3$.  Hence
+$3\mid P+1=2Q^\beta$, forcing
+\[
+Q=3.
+\]
+Thus
+\[
+P=2\cdot3^\beta-1,
+\qquad
+P+2=2\cdot3^\beta+1.
+\]
+If $\beta$ is odd, then according as $\beta\equiv1$ or $3\pmod4$, one of
+these two primes is divisible by $5$.  Hence $\beta=2r$ is even.
+
+At $k=4$,
+\[
+n+4=4\frac{3^\beta+1}{2},
+\]
+so
+\[
+T=\frac{3^\beta+1}{2}
+\]
+is a prime power.  Put $X=3^r$.  Then
+\[
+X^2+1=2Y^e.
+\]
+The same classification of $x^2+1=2y^m$ rules out $e>2$ except
+$(239,13,4)$, impossible for $X=3^r$; and $e=2$ is impossible modulo
+$3$.  Hence $e=1$, so $T$ is prime.
+
+If $r$ has an odd divisor $s>1$, then $3^{2r}+1$ factors as
+\[
+(3^{2r/s}+1)
+\left(3^{2r(s-1)/s}-3^{2r(s-2)/s}+\cdots-3^{2r/s}+1\right),
+\]
+so $T$ is composite.  Therefore $r=2^w$, and hence
+\[
+\boxed{\beta=2^{w+1}}.
+\]
+The case $w=0$ gives $\beta=2$, hence $P=17$ and $n=16$.
+For $w>0$ the three quantities
+\[
+2\cdot3^\beta-1,
+\qquad
+\frac{3^\beta+1}{2},
+\qquad
+2\cdot3^\beta+1
+\]
+must all be prime.  We leave this simultaneous-primality family open.
+This proves (ii).
+
+Finally suppose $\alpha=\beta=1$.  Put
+\[
+q=\frac{n+2}{2}.
+\]
+Then
+\[
+n+1=2q-1,
+\qquad
+n+3=2q+1
+\]
+are both prime.  If $q>3$, one of these two numbers is divisible by $3$
+and is strictly larger than $3$.  Hence $q=3$, giving $n=4$.
+\end{proof}
+
+\begin{corollary}[Complete $d_2=2,d_3=1$ branch]
+\label{cor:d2d3one}
+If $V_1(n)=1$ and
+\[
+d_2=2,
+\qquad d_3=1,
+\]
+then
+\[
+\boxed{n\in\{4,8,16,24,80\}}.
+\]
+Indeed, $c>1$ gives $n=24$ by Proposition~\ref{prop:branchclosed}, while
+$c=1$ gives $n\in\{4,8,16,80\}$ by Proposition~\ref{prop:primeleaf}.
+\end{corollary}
+
+\begin{remark}[Interpretation]
+The corollary classifies an entire state of the $d_k$ decision tree.  Thus
+any counterexample with $n>80$ must lie in the branch
+\[
+\boxed{d_2=2,\qquad d_3=3.}
+\]
+This concentrates the remaining Diophantine work on the $d_3=3$ branch.
+\end{remark}
+
+\subsection{The residual simultaneous-primality family}
+
+The unresolved part of Proposition~\ref{prop:primeleaf} has a particularly
+compact one-parameter form.  For $s>1$ put
+\[
+\beta=2^s.
+\]
+Then any remaining counterexample on the prime $n+3$ leaf must satisfy
+\[
+\boxed{
+2\cdot3^{2^s}-1,
+\qquad
+\frac{3^{2^s}+1}{2},
+\qquad
+2\cdot3^{2^s}+1
+\text{ are prime}.
+}
+\tag{41}\label{eq:residual-prime-triple}
+\]
+The first and third expressions are the two endpoints $n+1$ and $n+3$,
+while the middle expression is forced by the $k=4$ condition.  This turns
+the unresolved leaf into a simultaneous-primality problem in a single
+power-of-two exponent.  The OEIS records the exponents for which
+$2\cdot3^m-1$ is prime and separately those for which $2\cdot3^m+1$ is
+prime; these sequences show that the remaining question is not a routine
+congruence exercise.  We therefore treat \eqref{eq:residual-prime-triple}
+as a genuine residual Diophantine target rather than assert an unsupported
+elimination.
+
+\section{The branch \(d_2=2,\ d_3=3\)}
+
+We now assume
+\[
+d_3=3.
+\]
+Then
+\[
+n+3=3q_3,
+\]
+so \(3\mid n\). Together with \(4\mid n\),
+\[
+\boxed{12\mid n.}
+\tag{26}
+\]
+
+Since
+\[
+d_4\mid\operatorname{lcm}(1,2,3,4)=12
+\]
+and \(\gcd(d_3,d_4)\mid1\),
+we have
+\[
+3\nmid d_4.
+\]
+Thus
+\[
+d_4\in\{1,2,4\}.
+\]
+But \(4\mid n\) implies \(4\mid n+4\), so the complete \(2\)-adic small
+component cannot be represented by \(d_4=2\). Hence
+\[
+\boxed{d_4\in\{1,4\}.}
+\tag{27}
+\]
+
+\subsection{The subbranch \(d_4=1\)}
+
+If
+\[
+d_4=1,
+\]
+then
+\[
+n+4=2^a.
+\]
+Since \(3\mid n\),
+\[
+2^a\equiv1\pmod3,
+\]
+so \(a\) is even:
+\[
+a=2b.
+\]
+Then
+\[
+n+3=2^{2b}-1,
+\]
+and because \(d_3=3\),
+\[
+\frac{2^{2b}-1}{3}
+\]
+must be a prime power.
+
+But
+\[
+\frac{2^{2b}-1}{3}
+=
+\begin{cases}
+(2^b-1)\dfrac{2^b+1}{3},&b\text{ odd},\\[1.2ex]
+\dfrac{2^b-1}{3}(2^b+1),&b\text{ even}.
+\end{cases}
+\tag{28}
+\]
+For \(b>2\), the two factors are integers \(>1\) and are coprime.  Hence
+the product cannot be a prime power.
+
+Therefore
+\[
+\boxed{d_4=1\Longrightarrow n=12.}
+\tag{29}
+\]
+
+Consequently, for every \(n>12\) in this branch,
+\[
+\boxed{d_4=4.}
+\tag{30}
+\]
+
+
+\begin{lemma}[The $d_4=4$ branch is divisible by $24$]
+\label{lem:24div}
+Assume $d_2=2$, $d_3=3$, and $d_4=4$.  Then
+\[
+\boxed{24\mid n}.
+\]
+Consequently, if $d_5=5$, then $120\mid n$.
+\end{lemma}
+
+\begin{proof}
+We know $12\mid n$, so write $n=12m$.  Since
+\[
+q_4=\frac{n+4}{4}=3m+1
+\]
+is coprime to $d_4=4$, the integer $q_4$ is odd.  Hence $m$ is even,
+so $24\mid n$.  If $d_5=5$, then also $5\mid n$, giving $120\mid n$.
+\end{proof}
+
+\subsection{The two subbranches for \(d_5\)}
+
+Since \(12\mid n\),
+\[
+n+5
+\]
+is odd and not divisible by \(3\).  Moreover
+\[
+d_5\mid\operatorname{lcm}(1,\ldots,5)=60
+\]
+and
+\[
+\gcd(d_4,d_5)=1.
+\]
+Hence
+\[
+\boxed{d_5\in\{1,5\}.}
+\tag{31}
+\]
+
+\subsubsection{Subbranch \(d_5=1\)}
+
+Here
+\[
+n+5=p
+\]
+is prime.  Thus
+\[
+n+1=p-4=P^\alpha,
+\]
+\[
+n+2=p-3=2Q^\beta,
+\]
+\[
+n+3=p-2=3R^\gamma,
+\]
+\[
+n+4=p-1=4S^\delta.
+\]
+Hence
+\[
+\boxed{
+\begin{aligned}
+p-4&=P^\alpha,\\
+p-3&=2Q^\beta,\\
+p-2&=3R^\gamma,\\
+p-1&=4S^\delta,
+\end{aligned}
+}
+\tag{32}\label{eq:fourpowers}
+\]
+with \(p\) prime.
+
+Since \(24\mid n=p-5\) by Lemma~\ref{lem:24div},
+\[
+\boxed{p\equiv5\pmod{24}.}
+\tag{33}
+\]
+
+The only solution currently visible in the finite computation with the
+required $d$-pattern is
+\[
+p=53,
+\qquad n=48.
+\]
+Indeed,
+\[
+\begin{aligned}
+53-4&=49=7^2,\\
+53-3&=50=2\cdot5^2,\\
+53-2&=51=3\cdot17,\\
+53-1&=52=4\cdot13.
+\end{aligned}
+\]
+The superficially similar value $p=29$ corresponds to $n=24$, but there
+$n+3=27=3^3$, so it belongs to the already classified $d_3=1$ branch.
+
+At present we do not have a proof that these are the only solutions to
+\eqref{eq:fourpowers}.  This is one of the principal remaining Diophantine targets.
+
+\subsubsection{Subbranch \(d_5=5\)}
+
+Here
+\[
+\boxed{120\mid n}
+\]
+by Lemma~\ref{lem:24div}.  Write
+\[
+n=120u.
+\]
+Then
+\[
+\begin{aligned}
+n+1&=120u+1=q_1,\\
+n+2&=2(60u+1)=2q_2,\\
+n+3&=3(40u+1)=3q_3,\\
+n+4&=4(30u+1)=4q_4,\\
+n+5&=5(24u+1)=5q_5.
+\end{aligned}
+\tag{34a}\label{eq:qblock120}
+\]
+Each $q_i$ is a prime power, and the small factors displayed explicitly are
+coprime to their corresponding $q_i$.
+
+Subtracting consecutive equations gives the exact prime-power chain
+\[
+\boxed{
+\begin{aligned}
+2q_2-q_1&=1,\\
+3q_3-2q_2&=1,\\
+4q_4-3q_3&=1,\\
+5q_5-4q_4&=1.
+\end{aligned}}
+\tag{34}\label{eq:chain}
+\]
+This is one of the main Diophantine objects remaining in the project.
+
+\subsection{The $k=6$ split}
+
+Because
+\[
+n+6=120u+6=6(20u+1),
+\]
+and $d_6\mid120$ with $\gcd(d_5,d_6)=1$, the only possibilities for a
+large counterexample are
+\[
+\boxed{d_6\in\{2,6\}.}
+\tag{35}
+\]
+Indeed, $d_6=1$ leaves the distinct factors $2$ and $3$ in the remainder,
+while $d_6=3$ leaves an even nontrivial remainder and hence cannot produce a
+single prime power; the cases containing $5$ are excluded by
+$\gcd(d_5,d_6)=1$.
+
+\subsubsection{Case $d_6=6$}
+
+Then
+\[
+q_6=20u+1
+\]
+is a prime power and
+\[
+\boxed{6q_6-5q_5=1.}
+\tag{36}\label{eq:q6chain}
+\]
+Together with \eqref{eq:chain}, this yields the six-term chain
+\[
+\boxed{
+120u+1,\;
+60u+1,\;
+40u+1,\;
+30u+1,\;
+24u+1,\;
+20u+1
+}
+\tag{37}\label{eq:qpowers}
+\]
+of prime-power expressions.  This branch remains unresolved.
+
+\subsubsection{Case $d_6=2$}
+
+Now
+\[
+n+6=6(20u+1).
+\]
+Since $d_6=2$, the remaining component is
+\[
+q_6=3(20u+1).
+\]
+For this to be a prime power, there must be an integer $b\ge1$ such that
+\[
+20u+1=3^b.
+\]
+The congruence modulo $20$ gives
+\[
+3^b\equiv1\pmod{20},
+\]
+so
+\[
+\boxed{b\equiv0\pmod4.}
+\]
+Write
+\[
+b=4t,
+\qquad
+u=\frac{3^{4t}-1}{20}.
+\tag{38}\label{eq:expfamily}
+\]
+Set
+\[
+N=4t+1.
+\]
+Then the five prime-power quantities forced by $k=1,\ldots,5$ are
+\[
+\boxed{
+\begin{aligned}
+q_1&=2\cdot3^N-5,\\
+q_2&=3^N-2,\\
+q_3&=2\cdot3^{N-1}-1,\\
+q_4&=\frac{3^N-1}{2},\\
+q_5&=\frac{2\cdot3^N-1}{5}.
+\end{aligned}}
+\tag{40}\label{eq:d6two-system}
+\]
+Each of these five quantities must be a prime power.
+
+\begin{lemma}[Prime-index reduction]
+\label{lem:Nprime}
+In the branch $d_5=5,d_6=2$, the integer $N=4t+1$ is prime.
+\end{lemma}
+
+\begin{proof}
+Suppose $N=rs$ with $r,s>1$ odd, and put $x=3^r$.  Then
+\[
+\frac{3^N-1}{2}
+=\frac{x-1}{2}(1+x+\cdots+x^{s-1}).
+\]
+Both factors exceed $1$.  If their product is a power of one prime $\ell$,
+then $\ell$ divides both factors.  Hence $\ell\mid x-1$, while the second
+factor is congruent to $s$ modulo $x-1$, so $\ell\mid s$.  By LTE,
+\[
+\nu_\ell(1+x+\cdots+x^{s-1})=\nu_\ell(s).
+\]
+Thus the second factor is at most $s$, contradicting
+\[
+1+x+\cdots+x^{s-1}>s.
+\]
+Hence $N$ is prime.
+\end{proof}
+
+Consequently this leaf reduces to the simultaneous prime-power system
+\eqref{eq:d6two-system} with
+\[
+\boxed{N\equiv1\pmod4,\qquad N\text{ prime}.}
+\]
+
+We can sharpen the congruence class of $N$ further.
+
+\begin{lemma}[A mod-$12$ restriction]
+\label{lem:Nmod12}
+In the branch $d_5=5,d_6=2$, one has
+\[
+\boxed{N\equiv1\pmod{12}.}
+\]
+\end{lemma}
+
+\begin{proof}
+Since $N$ is prime and $N>3$, we have
+\[
+N\equiv1\text{ or }5\pmod6.
+\]
+Suppose $N\equiv5\pmod6$.  Then
+\[
+N-1\equiv4\pmod6,
+\]
+and hence, modulo $7$,
+\[
+3^{N-1}\equiv3^4\equiv4\pmod7.
+\]
+Therefore
+\[
+q_3=2\cdot3^{N-1}-1\equiv7\equiv0\pmod7.
+\]
+But $q_3>7$ for $N>3$, while
+\[
+q_3\equiv-1\equiv2\pmod3.
+\]
+Thus $q_3$ cannot be a power of $7$, since every positive power of $7$ is
+$1$ modulo $3$.  This contradicts the prime-power condition on $q_3$.
+Consequently
+\[
+N\equiv1\pmod6.
+\]
+Together with $N\equiv1\pmod4$, this gives
+\[
+N\equiv1\pmod{12}.
+\]
+\end{proof}
+
+Thus the current sharp form of the $d_5=5,d_6=2$ branch is
+\[
+\boxed{
+N\text{ prime},\qquad N\equiv1\pmod{12},
+}
+\]
+together with the five simultaneous prime-power conditions
+\eqref{eq:d6two-system}.
+This is the sharpest form of the branch obtained so far.
+
+\subsection{Targeted computation of the residual $d_6=2$ leaf}
+
+The residual family \eqref{eq:d6two-system} is sufficiently structured that
+small exact computations are useful for guiding the next proof.  The table
+below records the first few admissible prime indices $N=4t+1$ and a first
+prime-power condition that fails.
+
+\[
+\begin{array}{c|c|l}
+ t&N&\text{first obstruction}\\
+\hline
+1&5&q_1=481=13\cdot37\\
+3&13&q_2=1594321=197\cdot8093\\
+4&17&q_1=2\cdot3^{17}-5=13\cdot71\cdot461\cdot607\\
+7&29&q_1=13^2\cdot139\cdot5843120971
+\end{array}
+\]
+
+This table is computational evidence only.  It does, however, illustrate
+that the five simultaneous prime-power requirements in
+\eqref{eq:d6two-system} are significantly stronger than any one of them
+individually.
+
+\section{The current decision tree}
+
+The proved reductions can be summarized as follows.
+
+\[
+\begin{array}{c}
+V_1(n)=1\\[1mm]
+\downarrow\\
+d_2=1\quad\text{or}\quad d_2=2\\
+\end{array}
+\]
+
+The first branch is completely closed:
+
+\[
+\boxed{
+d_2=1
+\Longrightarrow
+n\in\{1,2,3,6,7,15,30\}.
+}
+\]
+
+For \(n>30\),
+\[
+d_2=2.
+\]
+
+Then
+\[
+d_3\in\{1,3\}.
+\]
+
+For \(d_3=1\), write
+\[
+n+3=r^c.
+\]
+The case \(c>1\) is completely closed:
+\[
+\boxed{
+d_2=2,\ d_3=1,\ c>1
+\Longrightarrow n=24.
+}
+\]
+
+Therefore every large unresolved point on this branch must have
+\[
+\boxed{n+3\text{ prime}.}
+\]
+
+For \(d_3=3\),
+\[
+12\mid n.
+\]
+Then
+\[
+d_4\in\{1,4\},
+\]
+with
+\[
+d_4=1\Longrightarrow n=12.
+\]
+Hence for \(n>12\),
+\[
+d_4=4,
+\]
+and then
+\[
+d_5\in\{1,5\}.
+\]
+
+The resulting research tree is therefore
+
+\[
+\boxed{
+\begin{array}{rcl}
+d_2=1
+&\Longrightarrow&
+n\in\{1,2,3,6,7,15,30\},\\[1mm]
+d_2=2,\ d_3=1,\ c>1
+&\Longrightarrow&
+n=24,\\[1mm]
+d_2=2,\ d_3=1,\ c=1
+&\Longrightarrow&
+n\in\{4,8,16,80\}\text{ or the residual family \eqref{eq:residual-prime-triple}},\\[1mm]
+d_2=2,\ d_3=3,\ d_4=1
+&\Longrightarrow&
+n=12,\\[1mm]
+d_2=2,\ d_3=3,\ d_4=4,\ d_5=1
+&\Longrightarrow&
+\text{system \eqref{eq:fourpowers}},\\[1mm]
+d_2=2,\ d_3=3,\ d_4=4,\ d_5=5
+&\Longrightarrow&
+\text{chain \eqref{eq:chain} and families \eqref{eq:qpowers}--\eqref{eq:expfamily}}.
+\end{array}
+}
+\tag{39}
+\]
+
+This is the main structural output of the present work.
+
+\section{Cyclotomic interpretation}
+
+The branch
+\[
+d_2=2,\qquad d_3=1,\qquad c>1
+\]
+provides a particularly clear cyclotomic interpretation.
+
+After proving
+\[
+n=3^p-3,
+\]
+the conditions at \(k=2\) and \(k=4\) become
+\[
+\frac{3^p-1}{2}=\PhiC_p(3)
+\]
+and
+\[
+\frac{3^p+1}{4}=\PhiC_{2p}(3).
+\]
+Thus a counterexample would force both
+\[
+\PhiC_p(3)
+\quad\text{and}\quad
+\PhiC_{2p}(3)
+\]
+to be prime powers, while simultaneously
+\[
+3^p-2
+\]
+would have to be a prime power.
+
+The proof above shows how the requirement at \(k=6\) forces strong restrictions
+on the exponent \(p\), and the requirement at \(k=7\) then creates the
+congruence obstruction
+\[
+13\mid3^p+4.
+\]
+In the remaining residue class, the divisibility
+\[
+5\mid3^p-2
+\]
+converts the problem into the classical equation
+\[
+x^2+2=3^p.
+\]
+
+This is a useful model for future work: large counterexamples may be forced
+into simultaneous primality or prime-power conditions on several nearby
+cyclotomic values, after which primitive-divisor theory becomes relevant.
+
+\section{Proof ledger: what is proved and what is not}
+
+For clarity, we record the logical status of the main statements.
+
+\subsection*{Proved in this manuscript}
+
+\begin{enumerate}[label=\arabic*.]
+    \item The prime-power-component reformulation
+    \[
+    V(n,k)\geq2\iff Q_2(n+k)>k.
+    \]
+    \item The offset bound
+    \[
+    V(n,k)\geq2\Longrightarrow k^2-k<n.
+    \]
+    \item The divisor decomposition
+    \[
+    n+k=d_kq_k,\qquad d_k\mid L_k.
+    \]
+    \item The gcd compatibility
+    \[
+    \gcd(d_i,d_j)\mid|i-j|.
+    \]
+    \item The complete elimination of \(d_2=1\), apart from
+    \[
+    1,2,3,6,7,15,30.
+    \]
+    \item The implication
+    \[
+    d_2=2\Longrightarrow4\mid n.
+    \]
+    \item The implication
+    \[
+    d_2=2,\ d_3=1,\ c>1
+    \Longrightarrow r=3,\ c\text{ prime}.
+    \]
+    \item The complete elimination of that latter branch down to
+    \[
+    n=24.
+    \]
+    \item The implications
+    \[
+    d_2=2,\ d_3=3\Longrightarrow12\mid n,
+    \]
+    \[
+    d_4\in\{1,4\},
+    \]
+    and
+    \[
+    d_4=1\Longrightarrow n=12.
+    \]
+    \item For \(n>12\) on the \(d_3=3\) branch,
+    \[
+    d_4=4,\qquad d_5\in\{1,5\}.
+    \]
+    \item The prime-power reduction for the \(d_5=1\) and \(d_5=5\) leaves.
+    \item The exponential family arising from \(d_6=2\).
+\end{enumerate}
+
+\subsection*{Computationally established only}
+
+The exact finite computation up to
+\[
+5\cdot10^7
+\]
+and the distribution in Table~1 are computational statements.  They provide
+evidence and useful targets, but they do not prove finiteness.
+
+\subsection*{Still open within the present project}
+
+The principal unresolved systems are:
+
+\begin{enumerate}[label=\arabic*.]
+    \item The four-consecutive-prime-power system
+    \[
+    p-4=P^\alpha,\quad
+    p-3=2Q^\beta,\quad
+    p-2=3R^\gamma,\quad
+    p-1=4S^\delta.
+    \]
+    \item The prime-power chain
+    \[
+    120u+1,\ 60u+1,\ 40u+1,\ 30u+1,\ 24u+1,\ 20u+1
+    \]
+    together with the relations \eqref{eq:chain} and \eqref{eq:q6chain}.
+    \item The exponential family \eqref{eq:expfamily}.
+\end{enumerate}
+
+These are the natural next targets for further work.
+
+\section{Research directions}
+
+The present reductions suggest several concrete directions.
+
+\subsection{Classifying the small factors \(d_k\)}
+
+The condition
+\[
+\gcd(d_i,d_j)\mid|i-j|
+\]
+can be interpreted as a compatibility constraint on the prime support of the
+sequence
+\[
+d_1,d_2,d_3,\ldots.
+\]
+For small \(k\), each \(d_k\) is a divisor of a known least common multiple.
+The goal is to classify all compatible patterns before introducing the
+large prime-power components \(q_k\).
+
+This produces a finite-state type of problem: each prime \(\ell\) can enter
+the small part only for a controlled range of offsets, and repeated use of
+the same prime is forced to respect the differences \(i-j\).
+
+\subsection{Primitive divisors of the large components}
+
+The successful elimination of several infinite families used the following
+principle.
+
+Suppose
+\[
+A\mid B
+\]
+are exponents and both
+\[
+a^A+1,\qquad a^B+1
+\]
+occur inside the same prime-power constraint.  A primitive divisor at level
+\(2B\) has multiplicative order \(2B\), and therefore cannot coincide with a
+primitive divisor at a proper divisor level.
+
+This makes Bang--Zsigmondy particularly well suited to the present problem:
+prime-power hypotheses are incompatible with the existence of primitive
+divisors at two different levels.
+
+\subsection{Prime-power chains}
+
+The relation
+\[
+a_1q_1-a_2q_2=1
+\]
+between prime powers is extremely restrictive.  The branch \(d_5=5\) produces
+four such relations immediately, and \(k=6\) adds another.  One possible
+approach is to combine congruences modulo carefully chosen primes with
+valuation arguments and primitive divisor results.
+
+\subsection{The consecutive-prime-power leaf}
+
+The system
+\[
+p-4=P^\alpha,\quad
+p-3=2Q^\beta,\quad
+p-2=3R^\gamma,\quad
+p-1=4S^\delta
+\]
+remains one of the cleanest surviving Diophantine problems in the
+$d_3=3,d_4=4,d_5=1$ branch.  The finite computation identifies the
+configuration $p=53$ (equivalently $n=48$) among the small cases.  The value
+$p=29$ corresponds instead to $n=24$, for which $n+3=27=3^3$ and therefore
+belongs to the already classified $d_3=1$ branch.
+
+A useful next theorem would be a nontrivial restriction on the exponents
+\[
+\alpha,\beta,\gamma,\delta,
+\]
+for example a parity theorem, a forced exponent-$1$ statement, or a bound
+under natural coprimality assumptions.
+
+\section{Conclusion}
+
+The prime-power variant of Erd\H{o}s--Selfridge Problem \#889 remains open.
+The main contribution of the present draft is a rigorous structural reduction,
+not a complete resolution.
+
+The divisor decomposition
+\[
+n+k=d_kq_k
+\]
+and the compatibility law
+\[
+\gcd(d_i,d_j)\mid|i-j|
+\]
+convert the original problem into a controlled collection of exponential
+Diophantine configurations.  The entire \(d_2=1\) branch can be closed using
+Catalan--Mih\H ailescu and Bang--Zsigmondy, while the substantial branch
+\[
+d_2=2,\ d_3=1,\ c>1
+\]
+reduces completely to the exceptional value \(n=24\), with the crucial final
+step supplied by the classical equation
+\[
+x^2+2=3^p.
+\]
+
+The remaining problem is therefore considerably narrower than the original
+formulation.  The main open tasks are now explicit systems of equations
+between prime powers, together with the compatible small-factor sequence
+\((d_k)\).  This is the point at which the investigation can move from
+global experimentation to the classification of individual Diophantine
+leaves.
+
+\section*{Acknowledgements}
+
+The author thanks the literature surrounding the Erd\H{o}s Problems project,
+the Formal Conjectures project, and the classical work of Erd\H{o}s,
+Selfridge, Bang, Zsigmondy, Catalan, Mih\H ailescu, and Ljunggren, whose
+results form the framework of the present investigation.
+
+\begin{thebibliography}{99}
+
+\bibitem{erdos1967}
+P.~Erd\H{o}s and J.~L.~Selfridge,
+\emph{Some problems on the prime factors of consecutive integers},
+Illinois Journal of Mathematics \textbf{11} (1967), 428--430.
+Available at:
+\url{https://combinatorica.hu/~p_erdos/1967-21.pdf}.
+
+\bibitem{erdosproblems}
+T.~F.~Bloom,
+\emph{Erd\H{o}s Problem \#889},
+Erd\H{o}s Problems, current online status,
+\url{https://www.erdosproblems.com/889}.
+
+\bibitem{formal889}
+Google DeepMind,
+\emph{Formal Conjectures: ErdosProblems/889.lean},
+\url{https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/889.lean}.
+
+\bibitem{Cohn1993}
+J.~H.~E. Cohn,
+\emph{The Diophantine equation $x^2+C=y^n$},
+Acta Arithmetica \textbf{65} (1993), 367--381.
+
+\bibitem{SteinerTzanakis1991}
+R. Steiner and N. Tzanakis,
+\emph{Simplifying the solution of Ljunggren's equation $X^2+1=2Y^4$},
+Journal of Number Theory \textbf{37} (1991), 123--132.
+
+\bibitem{ljunggren1943}
+W.~Ljunggren,
+\emph{\"Uber die Gleichung \(x^2+2=y^n\)},
+Arkiv f\"or Matematik, Astronomi och Fysik \textbf{29A} (1943), no.~13,
+1--11.
+
+\bibitem{zsigmondy}
+K.~Zsigmondy,
+\emph{Zur Theorie der Potenzreste},
+Monatshefte f\"ur Mathematik und Physik \textbf{3} (1892), 265--284.
+
+\bibitem{catalan}
+P.~Mih\u{a}ilescu,
+\emph{Primary cyclotomic units and a proof of Catalan's conjecture},
+Journal f\"ur die reine und angewandte Mathematik \textbf{572} (2004),
+167--195.
+
+\bibitem{bloomreport}
+T.~F.~Bloom,
+\emph{Erd\H{o}s \#889 -- working report},
+2026.
+The report distinguishes rigorous arguments from computational observations
+and records the current open status of the problem.
+
+\end{thebibliography}
+
+\appendix
+
+\section{Exact computational sieve}
+
+The principal computational object is the second-largest prime-power
+component \(Q_2(m)\).  The following implementation uses a linear smallest
+prime factor sieve and then accumulates the intervals \eqref{eq:interval}.
+
+\begin{verbatim}
+#include <bits/stdc++.h>
+using namespace std;
+
+// Exact search for the Erdős–Selfridge prime-power variant:
+//
+// V(n,k) = number of p such that p^{nu_p(n+k)} > k.
+//
+// We seek all n <= N with max_{k>=1} V(n,k) <= 1.
+//
+// Let Q2(m) be the second-largest prime-power component of m.
+// Then V(n,k) >= 2 iff Q2(n+k) > k.
+// Hence m=n+k covers n precisely when
+//
+//     m - Q2(m) + 1 <= n <= m-1.
+//
+// Also, V(n,k)>=2 implies k^2-k<n.
+
+static int Kbound(long long N) {
+    long long k = 1;
+    while ((k + 1) * (k + 1) - (k + 1) < N) ++k;
+    return (int)k;
+}
+
+int main(int argc, char** argv) {
+    int N = (argc >= 2 ? atoi(argv[1]) : 1000000);
+    if (N < 1) return 1;
+
+    const int K = Kbound(N);
+    const int M = N + K;
+
+    cerr << "N=" << N << " K=" << K << " M=" << M << '\n';
+
+    // Smallest prime factor table via a linear sieve.
+    vector<uint32_t> spf(M + 1, 0);
+    vector<int> primes;
+    primes.reserve(M / max(1, (int)log((double)M)));
+
+    for (int i = 2; i <= M; ++i) {
+        if (spf[i] == 0) {
+            spf[i] = (uint32_t)i;
+            primes.push_back(i);
+        }
+
+        for (int p : primes) {
+            if (p > (int)spf[i] || 1LL * i * p > M) break;
+            spf[i * p] = (uint32_t)p;
+        }
+    }
+
+    // q2[m] = second-largest prime-power component of m.
+    vector<uint32_t> q2(M + 1, 0);
+
+    for (int m = 2; m <= M; ++m) {
+        int x = m;
+        uint64_t best1 = 0, best2 = 0;
+
+        while (x > 1) {
+            int p = (int)spf[x];
+            uint64_t q = p;
+
+            x /= p;
+            while (x > 1 && (int)spf[x] == p) {
+                x /= p;
+                q *= (uint64_t)p;
+            }
+
+            if (q > best1) {
+                best2 = best1;
+                best1 = q;
+            } else if (q > best2) {
+                best2 = q;
+            }
+        }
+
+        q2[m] = (uint32_t)best2;
+    }
+
+    // Difference-array interval coverage.
+    vector<int32_t> diff(N + 2, 0);
+
+    for (int m = 2; m <= M; ++m) {
+        uint32_t q = q2[m];
+        if (q == 0) continue;
+
+        int L = max(1, m - (int)q + 1);
+        int R = min(N, m - 1);
+
+        if (L <= R) {
+            ++diff[L];
+            --diff[R + 1];
+        }
+    }
+
+    vector<int> exceptions;
+    int coverage = 0;
+
+    for (int n = 1; n <= N; ++n) {
+        coverage += diff[n];
+        if (coverage == 0) exceptions.push_back(n);
+    }
+
+    cout << "exceptions=" << exceptions.size() << '\n';
+    cout << "last="
+         << (exceptions.empty() ? -1 : exceptions.back()) << '\n';
+
+    for (size_t i = 0; i < exceptions.size(); ++i) {
+        if (i) cout << ' ';
+        cout << exceptions[i];
+    }
+    cout << '\n';
+
+    vector<long long> hist(32, 0);
+    int max_k = 0, max_n = -1;
+
+    unordered_set<int> is_exception;
+    is_exception.reserve(exceptions.size() * 2 + 1);
+
+    for (int n : exceptions) is_exception.insert(n);
+
+    for (int n = 1; n <= N; ++n) {
+        if (is_exception.count(n)) continue;
+
+        int witness = -1;
+
+        for (int k = 1; k <= K; ++k) {
+            if (q2[n + k] > (uint32_t)k) {
+                witness = k;
+                break;
+            }
+        }
+
+        if (witness < 0) {
+            cerr << "ERROR: no witness for n=" << n << '\n';
+            return 2;
+        }
+
+        if (witness >= (int)hist.size())
+            hist.resize(witness + 1);
+
+        ++hist[witness];
+
+        if (witness > max_k) {
+            max_k = witness;
+            max_n = n;
+        }
+    }
+
+    cout << "max_min_k=" << max_k
+         << " at_n=" << max_n << '\n';
+
+    for (int k = 1; k <= max_k; ++k) {
+        if (hist[k])
+            cout << k << ':' << hist[k] << ' ';
+    }
+
+    cout << '\n';
+}
+\end{verbatim}
+
+\section{Selected arithmetic identities}
+
+For convenient reference, the main identities used in the reductions are
+collected here.
+
+\subsection*{Branch \(d_2=1\)}
+
+\[
+n+1=2^a,\qquad n+2=2^a+1,
+\]
+or
+\[
+n+1=p,\qquad n+2=2^b,
+\]
+with \(b\) prime.
+
+The two infinite families arising before the Zsigmondy elimination are
+\[
+n=2^{2^t}-1
+\]
+and
+\[
+n=2^b-2,\qquad b\equiv1\pmod4.
+\]
+The latter reduces further to the Fermat-prime-shaped family
+\[
+b=2^{2^s}+1.
+\]
+
+\subsection*{Branch \(d_2=2,d_3=1,c>1\)}
+
+\[
+n=3^p-3,
+\]
+\[
+\frac{3^p-1}{2}=\PhiC_p(3),
+\]
+\[
+\frac{3^p+1}{4}=\PhiC_{2p}(3),
+\]
+\[
+3^p-2=P^\alpha.
+\]
+
+The two decisive congruence regimes are
+\[
+p\equiv1\pmod4
+\]
+and
+\[
+p\equiv3\pmod4.
+\]
+
+In the first,
+\[
+p-1=2^t
+\]
+is forced by the prime-power condition at \(k=6\), followed by
+\[
+13\mid3^p+4
+\]
+at \(k=7\).
+
+In the second,
+\[
+5\mid3^p-2,
+\]
+hence
+\[
+3^p-2=5^{2a},
+\]
+reducing to
+\[
+(5^a)^2+2=3^p.
+\]
+
+\subsection*{Branch \(d_2=2,d_3=3\)}
+
+\[
+12\mid n,
+\]
+\[
+d_4\in\{1,4\},
+\]
+\[
+d_4=1\Longrightarrow n=12,
+\]
+and for \(n>12\),
+\[
+d_4=4,
+\qquad
+d_5\in\{1,5\}.
+\]
+
+For \(d_5=5\),
+\[
+n=120u
+\]
+and
+\[
+\begin{aligned}
+2q_2-q_1&=1,\\
+3q_3-2q_2&=1,\\
+4q_4-3q_3&=1,\\
+5q_5-4q_4&=1.
+\end{aligned}
+\]
+
+If \(d_6=2\),
+\[
+20u+1=3^{4t},
+\qquad
+u=\frac{3^{4t}-1}{20}.
+\]
+
+\section{A checklist for the next proof phase}
+
+The natural next step is not a larger blind search.  It is to attack the
+remaining leaves one by one.
+
+\begin{enumerate}[label=\arabic*.]
+    \item Study the equation
+    \[
+    P^\alpha+1=2Q^\beta
+    \]
+    together with the primality of
+    \[
+    P^\alpha+2.
+    \]
+    The known values \(n=8,16,80\) should emerge naturally.
+
+    \item Study the four consecutive relations
+    \[
+    p-4=P^\alpha,\quad
+    p-3=2Q^\beta,\quad
+    p-2=3R^\gamma,\quad
+    p-1=4S^\delta.
+    \]
+    The first relevant example in this branch is \(p=53\) (equivalently \(n=48\)).
+
+    \item For \(d_5=5\), exploit the linear prime-power chain and try to force
+    incompatible residue classes.
+
+    \item In the \(d_6=2\) exponential branch, apply primitive-divisor
+    arguments to the numbers
+    \[
+    3^{4t+1}-2,\quad
+    2\cdot3^{4t}-1,\quad
+    \frac{3^{4t+1}-1}{2},
+    \quad
+    \frac{6\cdot3^{4t}-1}{5}.
+    \]
+
+    \item Extend the \(d_k\)-classification to \(k=7,8,\ldots\) only after
+    the small-\(k\) leaves have been simplified as far as possible.
+\end{enumerate}
+
+\end{document}
