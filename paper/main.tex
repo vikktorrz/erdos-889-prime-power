@@ -104,6 +104,20 @@ problem reduces to the residual simultaneous-primality family
 We deliberately leave that final family open rather than claiming a
 resolution not supplied by the present arguments.
 
+A further elementary sieve using the primes \(7,11,19,47,89,\) and \(311\)
+shows that its parameter must satisfy
+\[
+s\equiv5\text{ or }9\pmod{12},\qquad
+s\not\equiv9\pmod{11},\qquad
+s\not\equiv9\pmod{10},\qquad
+s\not\equiv5\pmod{20}.
+\]
+In particular, none of the residual parameters \(2\leq s\leq16\) survives.
+Thus any counterexample arising from this residual family must have
+\[
+n\geq2\cdot3^{131072}-2.
+\]
+
 The remaining leaves are also reduced explicitly.  In particular, for
 \(d_2=2,d_3=3\) we obtain \(12\mid n\), the dichotomy
 \(d_4\in\{1,4\}\), the collapse \(d_4=1\Rightarrow n=12\), and finally
@@ -1546,6 +1560,100 @@ prime; these sequences show that the remaining question is not a routine
 congruence exercise.  We therefore treat \eqref{eq:residual-prime-triple}
 as a genuine residual Diophantine target rather than assert an unsupported
 elimination.
+
+\begin{proposition}[Local obstructions for the residual prime triple]
+\label{prop:triple-sieve}
+Let \(s>1\).  If all three numbers in
+\eqref{eq:residual-prime-triple} are prime, then
+\[
+\boxed{
+s\equiv5\text{ or }9\pmod{12},\qquad
+s\not\equiv9\pmod{11},\qquad
+s\not\equiv9\pmod{10},\qquad
+s\not\equiv5\pmod{20}.
+}
+\]
+Consequently, the residual family has no solution with \(2\leq s\leq16\);
+the least parameter not excluded by these congruences is \(s=17\).
+\end{proposition}
+
+\begin{proof}
+Put \(x=3^{2^s}\), and write
+\[
+A=2x-1,\qquad C=2x+1.
+\]
+Both \(A\) and \(C\) are prime by hypothesis.
+
+If \(s\) is even, then \(2^s\equiv4\pmod6\), so
+\[
+x\equiv3^4\equiv4\pmod7,
+\qquad
+A\equiv0\pmod7.
+\]
+Since \(A\geq161>7\), this contradicts primality.  Thus \(s\) is odd.
+
+If \(s\equiv3\pmod4\), then \(2^s\equiv3\pmod5\).  As \(3^5\equiv1\pmod{11}\),
+\[
+x\equiv3^3\equiv5\pmod{11},
+\qquad
+C\equiv0\pmod{11}.
+\]
+Here \(C>11\), a contradiction.  Hence \(s\not\equiv3\pmod4\).
+
+If \(s\equiv1\pmod6\), then \(2^s\equiv2\pmod{18}\): indeed,
+\(2^s\equiv2\pmod9\) and \(2^s\) is even.  Fermat's theorem gives
+\[
+x\equiv3^2\equiv9\pmod{19},
+\qquad
+C\equiv0\pmod{19}.
+\]
+Because \(s>1\), such an \(s\) is at least \(7\), so \(C>19\), again a
+contradiction.  Combining the three restrictions obtained so far yields
+\[
+s\equiv5\text{ or }9\pmod{12}.
+\]
+
+For the remaining exclusions, the same argument applies to \(A\).
+If \(s\equiv9\pmod{11}\), then \(2^s\equiv6\pmod{23}\) and
+\(3^{2^s}\equiv3^6\equiv24\pmod{47}\), so \(47\mid A\).  Since \(A>47\),
+this is impossible.
+
+If \(s\equiv9\pmod{10}\), then \(s\geq9\), and the exponent \(2^s\) is
+congruent to \(0\pmod8\) and \(6\pmod{11}\), hence to \(72\pmod{88}\).
+Thus
+\[
+x\equiv3^{72}\equiv45\pmod{89},
+\qquad
+A\equiv0\pmod{89}.
+\]
+Again \(A>89\), a contradiction.
+
+Finally, if \(s\equiv5\pmod{20}\), then \(2^s\equiv32\pmod{155}\).
+Since \(3^{155}\equiv1\pmod{311}\) and \(3^{32}\equiv156\pmod{311}\),
+\[
+x\equiv156\pmod{311},
+\qquad
+A\equiv0\pmod{311}.
+\]
+Such an \(s>1\) is at least \(5\), so \(A>311\), which contradicts the
+primality of \(A\).  This proves all the claimed restrictions.
+
+For \(2\leq s\leq16\), an even \(s\) is ruled out by \(7\); among the odd
+values, \(s\equiv3\pmod4\), \(s\equiv1\pmod6\), or one of the last three
+forbidden classes applies.  Directly, the only values in this range left
+after the first three restrictions are \(5\) and \(9\), which are excluded
+by \(311\) and \(47\), respectively.  The congruence conditions all hold at
+\(s=17\), so \(17\) is the least parameter not ruled out by this finite
+local sieve.
+\end{proof}
+
+Since \(n=2\cdot3^{2^s}-2\) on this leaf, Proposition~\ref{prop:triple-sieve}
+shows that any solution in this residual family would satisfy
+\[
+n\geq2\cdot3^{131072}-2.
+\]
+This is only a lower bound for a possible solution; it does not eliminate the
+remaining simultaneous-primality family.
 
 \section{The branch \(d_2=2,\ d_3=3\)}
 

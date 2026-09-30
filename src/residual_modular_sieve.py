@@ -1,17 +1,21 @@
-#!/usr/bin/env python3
-
 from collections import defaultdict
+from math import isqrt
 
 
 def sieve(n):
     is_prime = bytearray(b"\x01") * (n + 1)
-    is_prime[:2] = b"\x00\x00"
 
-    for p in range(2, int(n ** 0.5) + 1):
+    if n >= 0:
+        is_prime[0] = 0
+
+    if n >= 1:
+        is_prime[1] = 0
+
+    for p in range(2, isqrt(n) + 1):
         if is_prime[p]:
-            is_prime[p * p : n + 1 : p] = b"\x00" * (
-                (n - p * p) // p + 1
-            )
+            start = p * p
+            length = (n - start) // p + 1
+            is_prime[start:n + 1:p] = b"\x00" * length
 
     return is_prime
 
@@ -19,15 +23,22 @@ def sieve(n):
 def factorize(n):
     factors = []
 
-    p = 2
+    if n % 2 == 0:
+        factors.append(2)
+
+        while n % 2 == 0:
+            n //= 2
+
+    p = 3
 
     while p * p <= n:
         if n % p == 0:
             factors.append(p)
+
             while n % p == 0:
                 n //= p
 
-        p += 1 if p == 2 else 2
+        p += 2
 
     if n > 1:
         factors.append(n)
@@ -38,7 +49,7 @@ def factorize(n):
 def multiplicative_order(a, p):
     order = p - 1
 
-    for q in factorize(p - 1):
+    for q in factorize(order):
         while order % q == 0 and pow(a, order // q, p) == 1:
             order //= q
 
@@ -46,13 +57,6 @@ def multiplicative_order(a, p):
 
 
 def discrete_log_classes(a, target, p):
-    """
-    Return all r modulo ord_p(a) such that
-
-        a^r = target (mod p).
-
-    There is at most one such residue modulo the order.
-    """
     order = multiplicative_order(a, p)
 
     x = 1
@@ -71,12 +75,15 @@ def main():
     R_LIMIT = 10000
 
     is_prime = sieve(PRIME_LIMIT)
+    forbidden_A = defaultdict(set)
 
-    forbidden_a = defaultdict(set)
-    forbidden_b = defaultdict(set)
+    forbidden_B = defaultdict(set)
+
+    forbidden_P = defaultdict(set)
 
     print("Residual modular sieve")
     print(f"prime limit = {PRIME_LIMIT}")
+    print(f"r range = 1..{R_LIMIT}")
     print()
 
     for q in range(7, PRIME_LIMIT + 1):
@@ -84,17 +91,19 @@ def main():
             continue
 
         a = pow(5, 6, q)
+
         inv3 = pow(3, q - 2, q)
 
-        # A_r = 3*5^(6r) - 2.
-        #
-        # q | A_r  <=>  a^r = 2/3 (mod q).
-        target_a = 2 * inv3 % q
+        target_A = 2 * inv3 % q
 
-        order, residue = discrete_log_classes(a, target_a, q)
+        order, residue = discrete_log_classes(
+            a,
+            target_A,
+            q,
+        )
 
         if residue is not None and q % 5 != 3:
-            forbidden_a[order].add(residue)
+            forbidden_A[order].add(residue)
 
             print(
                 f"A: q={q:4d}, "
@@ -102,28 +111,50 @@ def main():
                 f"r ≡ {residue:4d} (mod {order})"
             )
 
-        # B_r = (3*5^(6r)+1)/4.
-        #
-        # q | B_r  <=>  a^r = -1/3 (mod q).
-        target_b = (-inv3) % q
 
-        order, residue = discrete_log_classes(a, target_b, q)
+        target_B = (-inv3) % q
+
+        order, residue = discrete_log_classes(
+            a,
+            target_B,
+            q,
+        )
 
         if residue is not None and q % 5 == 1:
-            forbidden_b[order].add(residue)
+            forbidden_B[order].add(residue)
 
             print(
                 f"B: q={q:4d}, "
                 f"order={order:4d}, "
                 f"r ≡ {residue:4d} (mod {order})"
             )
+        target_P = (-2 * inv3) % q
+
+        order, residue = discrete_log_classes(
+            a,
+            target_P,
+            q,
+        )
+
+        if residue is not None:
+            forbidden_P[order].add(residue)
+
+            print(
+                f"P: q={q:4d}, "
+                f"order={order:4d}, "
+                f"r ≡ {residue:4d} (mod {order})"
+            )
 
     def survives(r):
-        for modulus, residues in forbidden_a.items():
+        for modulus, residues in forbidden_A.items():
             if r % modulus in residues:
                 return False
 
-        for modulus, residues in forbidden_b.items():
+        for modulus, residues in forbidden_B.items():
+            if r % modulus in residues:
+                return False
+
+        for modulus, residues in forbidden_P.items():
             if r % modulus in residues:
                 return False
 
@@ -138,11 +169,15 @@ def main():
     print()
     print("Summary")
     print("-------")
-    print(f"Forbidden A moduli: {len(forbidden_a)}")
-    print(f"Forbidden B moduli: {len(forbidden_b)}")
+
+    print(f"Forbidden A moduli: {len(forbidden_A)}")
+    print(f"Forbidden B moduli: {len(forbidden_B)}")
+    print(f"Forbidden P moduli: {len(forbidden_P)}")
+
     print(f"R range: 1..{R_LIMIT}")
     print(f"Survivors: {len(survivors)}")
     print(f"Survival rate: {len(survivors) / R_LIMIT:.4f}")
+
     print()
     print("First survivors:")
     print(survivors[:100])
@@ -150,4 +185,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
